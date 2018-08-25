@@ -25,7 +25,17 @@ var chinaData={"type": "FeatureCollection",
 ]
 }
 
-
+var pointdata={
+"type":"Feature",
+"features":[
+	{"type":"Feature","properties":{"id":"1","name":"甘孜藏族自治区"},"geometry":{"type":"point","coordinates":[99.58,31.59]}},
+	{"type":"Feature","properties":{"id":"2","name":"阿坝羌族藏族自治区"},"geometry":{"type":"point","coordinates":[102.59,32.19]}},
+	{"type":"Feature","properties":{"id":"3","name":"雅安"},"geometry":{"type":"point","coordinates":[102.78,29.88]}},
+	{"type":"Feature","properties":{"id":"4","name":"攀枝花"},"geometry":{"type":"point","coordinates":[101.81,26.89]}},
+	{"type":"Feature","properties":{"id":"5","name":"成都"},"geometry":{"type":"point","coordinates":[103.77,30.65]}},
+	{"type":"Feature","properties":{"id":"6","name":"绵阳"},"geometry":{"type":"point","coordinates":[104.78,31.82]}}
+]
+}
 
 var geojson,info;
 function getColor(d) {//#800026
@@ -48,6 +58,7 @@ function style(feature) {                                //json的每个属性�
 	   dashArray: '3',
 	   fillOpacity: 0.7
    };
+   
 }
 
 function highlightFeature(e) {//当鼠标拂过时高亮显示
@@ -91,6 +102,11 @@ geojson=L.geoJson(chinaData,{
 			onEachFeature: onEachFeature
 }).addTo(mymap);
 
+//geojson=L.geojson(pointdata,{
+//	style:style,
+//	 onEachFeature:onEachFeature
+//}).addTo(mymap);
+
 
 info = L.control({position: 'topright'});//添加一个组件，也可以使用自己定义的组件，设置监听事件，使用float属性 或者position:absolute 
 
@@ -102,7 +118,7 @@ info.onAdd = function (mymap) {
 
 // method that we will use to update the control based on feature properties passed
 info.update = function (props) {
-   this._div.innerHTML = '<h4>四川省各市新生儿数量</h4>' +  (props ?
+   this._div.innerHTML = '<h4>SiChuan Province Child Number</h4>' +  (props ?
 	   '<b>' + props.name + '</b><br />'+'<h5>每天新生儿数量</h5>' + props.childNum 
 	   : 'Hover over a province');
 };
