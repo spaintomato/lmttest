@@ -1,3 +1,17 @@
+
+var pointdata={
+	"type":"Feature",
+	"features":[
+		{"type":"Feature","properties":{"id":"1","name":"甘孜藏族自治区","num":30},"geometry":{"type":"point","coordinates":[99.58,31.59]}},
+		{"type":"Feature","properties":{"id":"2","name":"阿坝羌族藏族自治区","num":25},"geometry":{"type":"point","coordinates":[102.59,32.19]}},
+		{"type":"Feature","properties":{"id":"3","name":"雅安","num":17},"geometry":{"type":"point","coordinates":[102.78,29.88]}},
+		{"type":"Feature","properties":{"id":"4","name":"攀枝花","num":45},"geometry":{"type":"point","coordinates":[101.81,26.89]}},
+		{"type":"Feature","properties":{"id":"5","name":"成都","num":11},"geometry":{"type":"point","coordinates":[103.77,30.65]}},
+		{"type":"Feature","properties":{"id":"6","name":"绵阳","num":33},"geometry":{"type":"point","coordinates":[104.78,31.82]}}
+	]
+	}
+	
+
 var chinaData={"type": "FeatureCollection",
 "features":
 [
@@ -25,25 +39,13 @@ var chinaData={"type": "FeatureCollection",
 ]
 }
 
-var pointdata={
-"type":"Feature",
-"features":[
-	{"type":"Feature","properties":{"id":"1","name":"甘孜藏族自治区"},"geometry":{"type":"point","coordinates":[99.58,31.59]}},
-	{"type":"Feature","properties":{"id":"2","name":"阿坝羌族藏族自治区"},"geometry":{"type":"point","coordinates":[102.59,32.19]}},
-	{"type":"Feature","properties":{"id":"3","name":"雅安"},"geometry":{"type":"point","coordinates":[102.78,29.88]}},
-	{"type":"Feature","properties":{"id":"4","name":"攀枝花"},"geometry":{"type":"point","coordinates":[101.81,26.89]}},
-	{"type":"Feature","properties":{"id":"5","name":"成都"},"geometry":{"type":"point","coordinates":[103.77,30.65]}},
-	{"type":"Feature","properties":{"id":"6","name":"绵阳"},"geometry":{"type":"point","coordinates":[104.78,31.82]}}
-]
-}
-
-var geojson,info;
+var geojson,info,info1;
 function getColor(d) {//#800026
    return d > 20 ? '#800026' :
 		  d > 15  ? '#BD0026' :
 		  d > 12  ? '#E31A1C' :
 		  d > 10  ? '#FC4E2A' :
-		  d > 8   ? '#FD8D3C' :
+		  d > 8  ? '#FD8D3C' :
 		  d > 5   ? '#FEB24C' :
 		  d > 3   ? '#FED976' :
 					 '#FFEDA0';
@@ -51,16 +53,28 @@ function getColor(d) {//#800026
 }
 function style(feature) {                                //json的每个属性会执行此函数,数据的样式
    return {
-	   fillColor: getColor(feature.properties.childNum),   //
+	   fillColor: getColor(feature.properties.num),   //
 	   weight: 2,
 	   opacity: 1,
 	   color: 'white',
 	   dashArray: '3',
-	   fillOpacity: 0.7
+	   fillOpacity: 1
+	   
    };
-   
+  
 }
-
+function getColor(f) {//#800026//添加这个的目的是让点变成蓝色，在图上能明显显示出来
+	                            //出现的问题是数据读取的不是num而是childnum
+	return f > 40 ? '#0000FF' :
+		   f > 35  ? '#0000CD' :
+		   f > 30  ? '#191970' :
+		   f > 25  ? '#00008B' :
+		   f > 18 ? '#000080' :
+		   f > 15  ? '#4169E1' :
+		   f > 10   ? '#6495ED' :
+					  '#B0C4DE';
+ }
+ 
 function highlightFeature(e) {//当鼠标拂过时高亮显示
    var layer = e.target;
 
@@ -76,10 +90,15 @@ function highlightFeature(e) {//当鼠标拂过时高亮显示
    }
    info.update(layer.feature.properties);
 }
+
+
 function resetHighlight(e) {//当鼠标退出后reset
    geojson.resetStyle(e.target);//  geojson要先定义
    info.update();
 }
+
+
+
 
 function zoomToFeature(e) {//当点击时显示状态
    map.fitBounds(e.target.getBounds());//将图层设置在地理范围内，和当前地图视野的经纬度边界
@@ -97,15 +116,17 @@ L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png?access_token={pk.
    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
    maxZoom: 18
 }).addTo(mymap);
+
 geojson=L.geoJson(chinaData,{
 	style:style,
 			onEachFeature: onEachFeature
 }).addTo(mymap);
 
-//geojson=L.geojson(pointdata,{
-//	style:style,
-//	 onEachFeature:onEachFeature
-//}).addTo(mymap);
+//var geojson1=L.geoJson(pointdata,{
+	//style:style,
+	// onEachFeature:onEachFeature
+//}).addTo(mymap);注释掉的原因是：添加这个图层就会把下面的info图标覆盖掉。
+//我怀疑我point数据一直获取不到就是没添加图层的原因
 
 
 info = L.control({position: 'topright'});//添加一个组件，也可以使用自己定义的组件，设置监听事件，使用float属性 或者position:absolute 
@@ -118,12 +139,30 @@ info.onAdd = function (mymap) {
 
 // method that we will use to update the control based on feature properties passed
 info.update = function (props) {
-   this._div.innerHTML = '<h4>SiChuan Province Child Number</h4>' +  (props ?
-	   '<b>' + props.name + '</b><br />'+'<h5>每天新生儿数量</h5>' + props.childNum 
+   this._div.innerHTML = '<h4>sichuan province childnum</h4>' +  (props ?
+	   '<b>' + props.name + '</b><br />'+'<h5>四川各市新生儿童数量</h5>' + props.childNum 
 	   : 'Hover over a province');
 };
 
 info.addTo(mymap);//加入图标
+
+
+info1 = L.control({position: 'topright'});//添加一个组件，也可以使用自己定义的组件，设置监听事件，使用float属性 或者position:absolute 
+
+info1.onAdd = function (mymap) {
+   this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+   this.update();
+   return this._div;
+};
+
+// method that we will use to update the control based on feature properties passed
+info1.update = function (props) {
+   this._div.innerHTML = '<h4>point data</h4>' +  (props ?
+	   '<b>' + props.name + '</b><br />'+'<h5>num</h5>' + props.num 
+	   : 'Hover over a province');
+};
+
+info1.addTo(mymap);//加入另一个图标，目的是想通过监听显示point数据，因为pointdata里面的num获取不到，显示不出来
 
 var legend = L.control({position: 'bottomright'});
 
